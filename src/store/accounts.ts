@@ -1,46 +1,59 @@
-import {defineStore} from "pinia";
+import { defineStore } from "pinia";
 
-/** интерфейс аккаунта **/
+/** Интерфейс аккаунта **/
 interface Account {
   id: number;
   labels: string[];
-  type: 'LDAP' | 'Локальная';
+  type: "LDAP" | "Локальная";
   login: string;
   password: string | null;
   isValid: boolean;
 }
 
-export const useAccountsStore = defineStore({
-  id: "accounts",
+export const useAccountsStore = defineStore("accounts", {
 
-  /** храним аккаунты **/
-  state: () => ({
-    accounts: [] as Account[],
+  /** Храним аккаунты **/
+  state: (): { accounts: Account[] } => ({
+    accounts: [],
   }),
+
   actions: {
-    /** создание аккаунта **/
+    /** Создание аккаунта **/
     addAccount() {
       const newAccount: Account = {
         id: Date.now(),
         labels: [],
-        type: 'LDAP',
-        login: '',
+        type: "LDAP",
+        login: "",
         password: null,
         isValid: false,
-      }
+      };
+      this.accounts.push(newAccount); // Добавили в массив
+
+      console.log(newAccount)
     },
-    /** удаление аккаунта **/
+
+    /** Удаление аккаунта **/
     removeAccount(id: number) {
+      this.accounts = this.accounts.filter((acc) => acc.id !== id);
 
-      // массив объектов, хранящий все наши аккаунты, filter - метод массива, который создает новый массив с элементами
-      this.accounts = this.accounts.filter((acc) => {
-        // если id аккаунта не равен id, который мы хотим удалить, то мы его оставляем
-        return acc.id !== id;
-      })
+      console.log(id)
     },
-    /** обновление аккаунта **/
-    updateAccount(id: number, account: Partial<Account>) {
 
+    /** Обновление аккаунта **/
+    updateAccount(id: number, account: Partial<Account>) {
+      // Найти индекс аккаунта по id
+      const findIndexAcc: number = this.accounts.findIndex((acc) => acc.id === id);
+
+      console.log(findIndexAcc)
+
+      // Если нашли такой аккаунт, обновляем его
+      if (findIndexAcc !== -1) {
+        this.accounts[findIndexAcc] = {
+          ...this.accounts[findIndexAcc], // Оставляем старые данные
+          ...account, // Обновляем переданные поля
+        };
+      }
     }
   }
 });
