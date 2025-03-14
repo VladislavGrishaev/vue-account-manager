@@ -81,6 +81,9 @@ export const useAccountsStore = defineStore("accounts", {
           ...account, // Обновляем переданные поля
         };
       }
+
+      // Сохраняем обновлённый список аккаунтов в localStorage
+      this.saveAccounts()
     },
 
     /** Валидация аккаунта **/
