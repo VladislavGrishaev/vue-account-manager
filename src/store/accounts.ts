@@ -38,10 +38,12 @@ export const useAccountsStore = defineStore("accounts", {
     /** Создание аккаунта **/
     addAccount() {
       const lastId: number = this.getLastId();
+      const newId: number = lastId + 1;
+
       const newAccount: Account = {
-        id: lastId + 1,
+        id: newId,
         name: [],
-        type: "LDAP",
+        type: "Локальная",
         login: "",
         password: null,
         isValid: false,
@@ -51,7 +53,9 @@ export const useAccountsStore = defineStore("accounts", {
       // Сохраняем обновлённый список аккаунтов в localStorage
       this.saveAccounts();
 
-      console.log(newAccount)
+      localStorage.setItem("lastId", newId.toString());
+
+      console.log('addAccount: ' + newId)
     },
 
     /** Удаление аккаунта **/
@@ -68,7 +72,7 @@ export const useAccountsStore = defineStore("accounts", {
       // Найти индекс аккаунта по id
       const indexAcc: number = this.accounts.findIndex((acc) => acc.id === id);
 
-      console.log(indexAcc)
+      console.log('updateAccount: ' + indexAcc)
 
       // Если нашли такой аккаунт, обновляем его
       if (indexAcc !== -1) {

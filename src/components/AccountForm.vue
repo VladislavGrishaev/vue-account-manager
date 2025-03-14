@@ -13,6 +13,21 @@ const data = reactive({
   accounts: storeToRefs(useAccountsStore()).accounts
 });
 
+// метод добавления учётной записи
+const addAccount = () => {
+		store.addAccount();
+};
+
+// метод удаления учётной записи
+const removeAccount = (id: number) => {
+		store.removeAccount(id);
+};
+
+// метод обновления учётной записи
+const updateAccount = (id: number, account: Partial<Account>) => {
+		store.updateAccount(id, account);
+};
+
 </script>
 
 <template>
@@ -20,7 +35,11 @@ const data = reactive({
 				<v-container>
 						<div class="d-flex align-center justify-between mb-4 ga-5">
 								<h2 class="text-xl font-semibold">Учётные записи</h2>
-								<v-btn icon="mdi-plus" variant="outlined">
+								<v-btn
+												@click="addAccount"
+												icon="mdi-plus"
+												variant="outlined"
+								>
 										<v-icon>mdi-plus</v-icon>
 								</v-btn>
 						</div>
@@ -42,23 +61,48 @@ const data = reactive({
 														label="Метки"
 														variant="outlined"
 														hide-details
+														@blur="updateAccount(account.id, { name: account.name })"
 										/>
 								</v-col>
 
 								<v-col cols="2">
-										<v-select variant="outlined" hide-details></v-select>
+										<v-select
+														v-model="account.type"
+														variant="outlined"
+														hide-details
+														:items="['Локальная', 'LDAP']"
+														label="Тип записи"
+														@change="updateAccount(account.id, { type: account.type })"
+										></v-select>
 								</v-col>
 
 								<v-col cols="2">
-										<v-text-field label="Логин" variant="outlined" hide-details/>
+										<v-text-field
+														v-model="account.login"
+														label="Логин"
+														variant="outlined"
+														hide-details
+														@blur="updateAccount(account.id, { login: account.login })"
+										/>
 								</v-col>
 
 								<v-col cols="2">
-										<v-text-field label="Пароль" type="password" variant="outlined" hide-details/>
+										<v-text-field
+														v-model="account.password"
+														label="Пароль"
+														type="password"
+														variant="outlined"
+														hide-details
+														@blur="updateAccount(account.id, { password: account.password })"
+										/>
 								</v-col>
 
 								<v-col cols="2">
-										<v-btn icon="mdi-delete" variant="outlined">
+										<v-btn
+														@click="removeAccount(account.id)"
+														icon="mdi-delete"
+														variant="outlined"
+										>
 												<v-icon>mdi-delete</v-icon>
 										</v-btn>
 								</v-col>
