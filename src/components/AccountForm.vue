@@ -28,6 +28,15 @@ const updateAccount = (id: number, account: Partial<Account>) => {
 		store.updateAccount(id, account);
 };
 
+// ограничение на количество символов в поле
+const limitText = (account, field, maxLength) => {
+		if (account[field].length > maxLength) {
+				account[field] = account[field].slice(0, maxLength);
+		}
+};
+
+
+
 </script>
 
 <template>
@@ -54,6 +63,7 @@ const updateAccount = (id: number, account: Partial<Account>) => {
 						<v-row
 							v-for="account in data.accounts"
 							:key="account.id"
+							:class="{'no-password': account.type === 'LDAP'}"
 						>
 								<v-col cols="2 ">
 										<v-text-field
@@ -62,6 +72,7 @@ const updateAccount = (id: number, account: Partial<Account>) => {
 														variant="outlined"
 														hide-details
 														@blur="updateAccount(account.id, { name: account.name })"
+														@input="limitText(account, 'name', 50)"
 										/>
 								</v-col>
 
@@ -72,7 +83,7 @@ const updateAccount = (id: number, account: Partial<Account>) => {
 														hide-details
 														:items="['Локальная', 'LDAP']"
 														label="Тип записи"
-														@change="updateAccount(account.id, { type: account.type })"
+														@update:modelValue="updateAccount(account.id, { type: account.type })"
 										></v-select>
 								</v-col>
 
@@ -86,7 +97,10 @@ const updateAccount = (id: number, account: Partial<Account>) => {
 										/>
 								</v-col>
 
-								<v-col cols="2">
+								<v-col
+												v-if="account.type !==	'LDAP'"
+												cols="2"
+								>
 										<v-text-field
 														v-model="account.password"
 														label="Пароль"
@@ -111,3 +125,14 @@ const updateAccount = (id: number, account: Partial<Account>) => {
 				</v-container>
 		</div>
 </template>
+
+<style	scoped>
+.error	{
+		border: 1px solid red;
+}
+
+.no-password .v-col:nth-last-of-type(2) {
+    flex: 0 0 597px;
+    max-width: none;
+}
+</style>

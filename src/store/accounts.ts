@@ -76,8 +76,15 @@ export const useAccountsStore = defineStore("accounts", {
 
       // Если нашли такой аккаунт, обновляем его
       if (indexAcc !== -1) {
+        const existingAccount: Account = this.accounts[indexAcc];
+
+        // если изменился тип на LDAP, то обнуляем пароль
+        if (account.type === 'LDAP') {
+          account.password = null;
+        }
+
         this.accounts[indexAcc] = {
-          ...this.accounts[indexAcc], // Оставляем старые данные
+          ...existingAccount, // Оставляем старые данные
           ...account, // Обновляем переданные поля
         };
       }
