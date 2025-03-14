@@ -43,16 +43,29 @@ export const useAccountsStore = defineStore("accounts", {
     /** Обновление аккаунта **/
     updateAccount(id: number, account: Partial<Account>) {
       // Найти индекс аккаунта по id
-      const findIndexAcc: number = this.accounts.findIndex((acc) => acc.id === id);
+      const indexAcc: number = this.accounts.findIndex((acc) => acc.id === id);
 
-      console.log(findIndexAcc)
+      console.log(indexAcc)
 
       // Если нашли такой аккаунт, обновляем его
-      if (findIndexAcc !== -1) {
-        this.accounts[findIndexAcc] = {
-          ...this.accounts[findIndexAcc], // Оставляем старые данные
+      if (indexAcc !== -1) {
+        this.accounts[indexAcc] = {
+          ...this.accounts[indexAcc], // Оставляем старые данные
           ...account, // Обновляем переданные поля
         };
+      }
+    },
+
+    /** Валидация аккаунта **/
+    validateAccount(id: number) {
+      // Найти индекс аккаунта по id
+      const indexAcc: number = this.accounts.findIndex((acc) => acc.id === id);
+
+      console.log(indexAcc)
+
+      // Если нашли такой аккаунт, валидируем его
+      if (indexAcc !== -1) {
+        this.accounts[indexAcc].isValid = true;
       }
     }
   }

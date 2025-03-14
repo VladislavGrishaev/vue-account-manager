@@ -1,6 +1,17 @@
 <script setup lang="ts">
+import {useAccountsStore} from "../store/accounts.ts";
+import {reactive} from "vue";
+import {storeToRefs} from "pinia";
 
+//	получаем хранилище
+const store = useAccountsStore();
 
+// реактивный объект
+const data = reactive({
+
+  // позволяет сделать реактивными свойства объекта (чтобы обновлялись) и быть доступными как ссылки
+  accounts: storeToRefs(useAccountsStore()).accounts
+});
 
 </script>
 
