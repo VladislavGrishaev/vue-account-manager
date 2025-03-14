@@ -24,6 +24,7 @@ const data = reactive({
 										<v-icon>mdi-plus</v-icon>
 								</v-btn>
 						</div>
+
 						<v-row class="mb-2" align="center">
 								<v-col cols="8">
 										<v-alert type="info">
@@ -31,9 +32,17 @@ const data = reactive({
 										</v-alert>
 								</v-col>
 						</v-row>
-						<v-row>
+						<v-row
+							v-for="account in data.accounts"
+							:key="account.id"
+						>
 								<v-col cols="2 ">
-										<v-text-field label="Метки" variant="outlined" hide-details/>
+										<v-text-field
+														v-model="account.name"
+														label="Метки"
+														variant="outlined"
+														hide-details
+										/>
 								</v-col>
 
 								<v-col cols="2">
