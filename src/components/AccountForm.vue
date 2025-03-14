@@ -13,7 +13,13 @@
 										<v-icon>mdi-plus</v-icon>
 								</v-btn>
 						</div>
-
+						<v-row class="mb-2" align="center">
+								<v-col cols="8">
+										<v-alert type="info">
+												Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;
+										</v-alert>
+								</v-col>
+						</v-row>
 						<v-row>
 								<v-col cols="2 ">
 										<v-text-field label="Метки" variant="outlined" hide-details/>
