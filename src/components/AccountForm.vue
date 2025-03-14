@@ -94,6 +94,7 @@ const limitText = (account, field, maxLength) => {
 														variant="outlined"
 														hide-details
 														@blur="updateAccount(account.id, { login: account.login })"
+														@input="limitText(account, 'login', 100)"
 										/>
 								</v-col>
 
@@ -108,6 +109,7 @@ const limitText = (account, field, maxLength) => {
 														variant="outlined"
 														hide-details
 														@blur="updateAccount(account.id, { password: account.password })"
+														@input="limitText(account, 'password', 100)"
 										/>
 								</v-col>
 
