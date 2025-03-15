@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useAccountsStore} from "../store/accounts.ts";
-import {computed, reactive} from "vue";
+import {computed, reactive, ref} from "vue";
 import {storeToRefs} from "pinia";
 
 //	получаем хранилище
@@ -10,21 +10,21 @@ const store = useAccountsStore();
 const data = reactive({
 
   // позволяет сделать реактивными свойства объекта (чтобы обновлялись) и быть доступными как ссылки
-  accounts: storeToRefs(useAccountsStore()).accounts
+  accounts: storeToRefs(useAccountsStore()).accounts,
 });
 
 // метод добавления учётной записи
-const addAccount = () => {
+const addAcc = () => {
   store.addAccount();
 };
 
 // метод удаления учётной записи
-const removeAccount = (id: number) => {
+const removeAcc = (id: number) => {
   store.removeAccount(id);
 };
 
 // метод обновления учётной записи
-const updateAccount = (id: number, account: Partial<Account>) => {
+const updateAcc = (id: number, account: Partial<Account>) => {
   store.updateAccount(id, account);
 };
 
@@ -35,25 +35,37 @@ const limitText = (account, field, maxLength) => {
   }
 };
 
+const errors = ref<Record<number, Errors>>({});
 
 // отображение массива меток через разделитель ;
-
 const updateName = (account, nameAcc) => {
   if (!nameAcc) {
-				return;
-		}
-  else {
+    return;
+  } else {
     // При потере фокуса преобразуем строку в массив объектов
     const newArrayAcc = nameAcc
       .split(';')
-      .map((item) => ({ text: item.trim() }))
+      .map((item) => ({text: item.trim()}))
       .filter((item) => item.text !== "");
-    store.updateAccount(account.id, { name: newArrayAcc });
+    store.updateAccount(account.id, {name: newArrayAcc});
   }
 }
 
+// Валидация полей
+const validateAccField = (account, field: 'login' | 'password') => {
+  // результат валидации
+		const resultValid = store.validateAccount(account.id);
 
+  if (!errors.value[account.id]) {
+				errors.value[account.id] = {isValidate: true};
+  }
 
+  errors.value[account.id][field] = resultValid[field];
+
+  store.updateAccount(account.id, {
+    [field]: account[field],
+  });
+}
 
 
 </script>
@@ -64,94 +76,104 @@ const updateName = (account, nameAcc) => {
 						<div class="d-flex align-center justify-between mb-4 ga-5">
 								<h2 class="text-xl font-semibold">Учётные записи</h2>
 								<v-btn
-												@click="addAccount"
+												@click="addAcc"
 												icon="mdi-plus"
 												variant="outlined"
 								>
 										<v-icon>mdi-plus</v-icon>
 								</v-btn>
 						</div>
-
-						<v-row class="mb-2" align="center">
-								<v-col cols="8">
-										<v-alert type="info">
-												Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;
-										</v-alert>
-								</v-col>
-						</v-row>
-						<v-row
-										v-for="account in data.accounts"
-										:key="account.id"
-										:class="{'no-password': account.type === 'LDAP'}"
-						>
-								<v-col cols="2 ">
-										<v-text-field
-														v-model="account.nameAcc"
-														label="Метки"
-														variant="outlined"
-														hide-details
-														@blur="updateName(account, account.nameAcc)"
-														@input="limitText(account, 'name', 50)"
-										/>
-
-
-								</v-col>
-
-								<v-col cols="2">
-										<v-select
-														v-model="account.type"
-														variant="outlined"
-														hide-details
-														:items="['Локальная', 'LDAP']"
-														label="Тип записи"
-														@update:modelValue="updateAccount(account.id, { type: account.type })"
-										></v-select>
-								</v-col>
-
-								<v-col cols="2">
-										<v-text-field
-														v-model="account.login"
-														label="Логин"
-														variant="outlined"
-														hide-details
-														@blur="updateAccount(account.id, { login: account.login })"
-														@input="limitText(account, 'login', 100)"
-										/>
-								</v-col>
-
-								<v-col
-												v-if="account.type !==	'LDAP'"
-												cols="2"
+						<v-form>
+								<v-row class="mb-2" align="center">
+										<v-col cols="8">
+												<v-alert type="info" color="gray">
+														Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;
+												</v-alert>
+										</v-col>
+								</v-row>
+								<v-row
+												v-for="account in data.accounts"
+												:key="account.id"
+												:class="{'no-password': account.type === 'LDAP'}"
 								>
-										<v-text-field
-														v-model="account.password"
-														label="Пароль"
-														type="password"
-														variant="outlined"
-														hide-details
-														@blur="updateAccount(account.id, { password: account.password })"
-														@input="limitText(account, 'password', 100)"
-										/>
-								</v-col>
+										<v-col cols="2">
+												<v-text-field
+																:id="`username-${account.id}`"
+																v-model="account.nameAcc"
+																label="Метки"
+																variant="outlined"
+																:aria-describedby="`username-messages-${account.id}`"
+																autocomplete="username"
+																hide-details
+																@blur="updateName(account, account.nameAcc)"
+																@input="limitText(account, 'name', 50)"
+												/>
+										</v-col>
 
-								<v-col cols="2">
-										<v-btn
-														@click="removeAccount(account.id)"
-														icon="mdi-delete"
-														variant="outlined"
+										<v-col cols="2">
+												<v-select
+																v-model="account.type"
+																variant="outlined"
+																hide-details
+																:items="['Локальная', 'LDAP']"
+																label="Тип записи"
+																@update:modelValue="updateAcc(account.id, { type: account.type })"
+												></v-select>
+										</v-col>
+
+										<v-col cols="2">
+												<v-text-field
+																v-model="account.login"
+																label="Логин"
+																variant="outlined"
+																hide-details
+																autocomplete="username"
+																:class="{'error-field': errors[account.id]?.login}"
+																:error-messages="errors[account.id]?.login"
+																@blur="validateAccField(account, 'login')"
+																@input="limitText(account, 'login', 100)"
+												/>
+										</v-col>
+
+										<v-col
+														v-if="account.type !==	'LDAP'"
+														cols="2"
 										>
-												<v-icon>mdi-delete</v-icon>
-										</v-btn>
-								</v-col>
+												<v-text-field
+																:id="`login-${account.id}`"
+																v-model="account.password"
+																:aria-describedby="`login-messages-${account.id}`"
+																autocomplete="current-password"
+																label="Пароль"
+																type="password"
+																variant="outlined"
+																hide-details
+																:class="{'error-field': errors[account.id]?.password}"
+																:error-messages="errors[account.id]?.password"
+																@blur="validateAccField(account, 'password')"
+																@input="limitText(account, 'password', 100)"
+												/>
+										</v-col>
 
-						</v-row>
+										<v-col cols="2">
+												<v-btn
+																@click="removeAcc(account.id)"
+																icon="mdi-delete"
+																variant="outlined"
+												>
+														<v-icon>mdi-delete</v-icon>
+												</v-btn>
+										</v-col>
+
+								</v-row>
+						</v-form>
 				</v-container>
 		</div>
 </template>
 
 <style scoped>
-.error {
-    border: 1px solid red;
+.error-field .v-field__overlay {
+    border: 1px solid red !important;
 }
 
 .no-password .v-col:nth-last-of-type(2) {

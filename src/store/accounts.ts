@@ -7,6 +7,11 @@ interface Account {
   type: "LDAP" | "Локальная";
   login: string;
   password: string | null;
+}
+
+interface Errors {
+  login?: string;
+  password?: string;
   isValid: boolean;
 }
 
@@ -45,8 +50,7 @@ export const useAccountsStore = defineStore("accounts", {
         name: [{ text: "" }],
         type: "Локальная",
         login: "",
-        password: null,
-        isValid: false,
+        password: null
       };
       this.accounts.push(newAccount); // Добавили в массив
 
@@ -97,25 +101,36 @@ export const useAccountsStore = defineStore("accounts", {
           ...account, // Обновляем переданные поля
         };
       }
+      this.validateAccount(id)
 
       // Сохраняем обновлённый список аккаунтов в localStorage
       this.saveAccounts()
     },
 
     /** Валидация аккаунта **/
-    validateAccount(id: number): void {
-      // Найти индекс аккаунта по id
+    validateAccount(id: number): Errors {
       const indexAcc: number = this.accounts.findIndex((acc: Account): boolean => acc.id === id);
 
-      // Если нашли такой аккаунт, валидируем его
-      if (indexAcc !== -1) {
-        this.accounts[indexAcc].isValid = true;
+      if (indexAcc === -1) return { isValid: false };
 
-        // Сохраняем обновлённый список аккаунтов в localStorage
-        this.saveAccounts()
+      const account: Account = this.accounts[indexAcc];
+      const errors: Errors = { isValid: true };
+
+      if (!account.login.trim()) {
+        errors.login = "Логин обязателен";
+        errors.isValid = false;
       }
 
-      console.log(indexAcc)
+      if (account.type !== 'LDAP') {
+        if (!account.password || !account.password.trim()) {
+          errors.password = 'Пароль обязателен';
+          errors.isValid = false;
+        }
+      }
+
+      console.log('Valid')
+
+      return errors;
     }
   }
 });
