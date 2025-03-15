@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useAccountsStore} from "../store/accounts.ts";
-import {reactive} from "vue";
+import {computed, reactive} from "vue";
 import {storeToRefs} from "pinia";
 
 //	получаем хранилище
@@ -15,25 +15,44 @@ const data = reactive({
 
 // метод добавления учётной записи
 const addAccount = () => {
-		store.addAccount();
+  store.addAccount();
 };
 
 // метод удаления учётной записи
 const removeAccount = (id: number) => {
-		store.removeAccount(id);
+  store.removeAccount(id);
 };
 
 // метод обновления учётной записи
 const updateAccount = (id: number, account: Partial<Account>) => {
-		store.updateAccount(id, account);
+  store.updateAccount(id, account);
 };
 
 // ограничение на количество символов в поле
 const limitText = (account, field, maxLength) => {
-		if (account[field].length > maxLength) {
-				account[field] = account[field].slice(0, maxLength);
-		}
+  if (account[field].length > maxLength) {
+    account[field] = account[field].slice(0, maxLength);
+  }
 };
+
+
+// отображение массива меток через разделитель ;
+
+const updateName = (account, nameAcc) => {
+  if (!nameAcc) {
+				return;
+		}
+  else {
+    // При потере фокуса преобразуем строку в массив объектов
+    const newArrayAcc = nameAcc
+      .split(';')
+      .map((item) => ({ text: item.trim() }))
+      .filter((item) => item.text !== "");
+    store.updateAccount(account.id, { name: newArrayAcc });
+  }
+}
+
+
 
 
 
@@ -61,19 +80,21 @@ const limitText = (account, field, maxLength) => {
 								</v-col>
 						</v-row>
 						<v-row
-							v-for="account in data.accounts"
-							:key="account.id"
-							:class="{'no-password': account.type === 'LDAP'}"
+										v-for="account in data.accounts"
+										:key="account.id"
+										:class="{'no-password': account.type === 'LDAP'}"
 						>
 								<v-col cols="2 ">
 										<v-text-field
-														v-model="account.name"
+														v-model="account.nameAcc"
 														label="Метки"
 														variant="outlined"
 														hide-details
-														@blur="updateAccount(account.id, { name: account.name })"
+														@blur="updateName(account, account.nameAcc)"
 														@input="limitText(account, 'name', 50)"
 										/>
+
+
 								</v-col>
 
 								<v-col cols="2">
@@ -128,9 +149,9 @@ const limitText = (account, field, maxLength) => {
 		</div>
 </template>
 
-<style	scoped>
-.error	{
-		border: 1px solid red;
+<style scoped>
+.error {
+    border: 1px solid red;
 }
 
 .no-password .v-col:nth-last-of-type(2) {
