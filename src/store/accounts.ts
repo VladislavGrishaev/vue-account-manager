@@ -21,14 +21,12 @@ export const useAccountsStore = defineStore("accounts", {
   /** Храним аккаунты **/
   state: (): { accounts: Account[] } => {
 
-    /** Загрузка аккаунтов из LocalStorage **/
     const storedAccounts: string | null = localStorage.getItem("accounts");
     return {
       accounts: storedAccounts ? JSON.parse(storedAccounts) : [],
     };
   },
-
-  persist: true, // Сохранение состояния в LocalStorage
+  persist: true,
 
   actions: {
     /** Получаем последний id из LocalStorage **/
@@ -54,58 +52,41 @@ export const useAccountsStore = defineStore("accounts", {
         login: "",
         password: null
       };
-      this.accounts.push(newAccount); // Добавили в массив
+      this.accounts.push(newAccount);
 
-      // Сохраняем обновлённый список аккаунтов в localStorage
       this.saveAccounts();
 
       localStorage.setItem("lastId", newId.toString());
-
-      console.log('addAccount: ' + newId)
     },
 
     /** Удаление аккаунта **/
     removeAccount(id: number): void {
       this.accounts = this.accounts.filter((acc) => acc.id !== id);
-
-      // Сохраняем обновлённый список аккаунтов в localStorage
       this.saveAccounts()
-      console.log(id)
     },
 
     /** Обновление аккаунта **/
     updateAccount(id: number, account: Partial<Account>): void {
-      // Найти индекс аккаунта по id
       const indexAcc: number = this.accounts.findIndex((acc) => acc.id === id);
-
 
       if (account.name && typeof account.name === 'string') {
         //@ts-ignore
         account.name = account.name.split(';').map((label) => ({ text: label.trim() })).filter((label) => label.text !== '');
       }
 
-      console.log(account.name)
-
-
-      console.log('updateAccount: ' + indexAcc)
-
-      // Если нашли такой аккаунт, обновляем его
       if (indexAcc !== -1) {
         const existingAccount: Account = this.accounts[indexAcc];
 
-        // если изменился тип на LDAP, то обнуляем пароль
         if (account.type === 'LDAP') {
           account.password = null;
         }
 
         this.accounts[indexAcc] = {
-          ...existingAccount, // Оставляем старые данные
-          ...account, // Обновляем переданные поля
+          ...existingAccount,
+          ...account,
         };
       }
       this.validateAccount(id)
-
-      // Сохраняем обновлённый список аккаунтов в localStorage
       this.saveAccounts()
     },
 
@@ -129,9 +110,6 @@ export const useAccountsStore = defineStore("accounts", {
           errors.isValid = false;
         }
       }
-
-      console.log('Valid')
-
       return errors;
     }
   }

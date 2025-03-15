@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import {useAccountsStore} from "../store/accounts.ts";
-import {computed, reactive, ref, watch} from "vue";
+import {reactive, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
+/**--------------------------------------**/
 
-//	получаем хранилище
 const store = useAccountsStore();
 
-// реактивный объект
 const data = reactive({
-
-  // позволяет сделать реактивными свойства объекта (чтобы обновлялись) и быть доступными как ссылки
   accounts: storeToRefs(useAccountsStore()).accounts,
 });
 
@@ -81,8 +78,6 @@ watch(() => data.accounts, (accounts) => {
 		  immediate: true
   }
 );
-
-
 </script>
 
 <template>
@@ -98,14 +93,14 @@ watch(() => data.accounts, (accounts) => {
 										<v-icon>mdi-plus</v-icon>
 								</v-btn>
 						</div>
+						<v-row class="mb-2" align="center">
+								<v-col cols="8">
+										<v-alert type="info" color="gray">
+												Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;
+										</v-alert>
+								</v-col>
+						</v-row>
 						<v-form>
-								<v-row class="mb-2" align="center">
-										<v-col cols="8">
-												<v-alert type="info" color="gray">
-														Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;
-												</v-alert>
-										</v-col>
-								</v-row>
 								<v-row
 												v-for="account in data.accounts"
 												:key="account.id"
