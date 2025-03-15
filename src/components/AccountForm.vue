@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useAccountsStore} from "../store/accounts.ts";
-import {computed, reactive, ref} from "vue";
+import {computed, reactive, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
 
 //	получаем хранилище
@@ -37,20 +37,6 @@ const limitText = (account, field, maxLength) => {
 
 const errors = ref<Record<number, Errors>>({});
 
-// отображение массива меток через разделитель ;
-const updateName = (account, nameAcc) => {
-  if (!nameAcc) {
-    return;
-  } else {
-    // При потере фокуса преобразуем строку в массив объектов
-    const newArrayAcc = nameAcc
-      .split(';')
-      .map((item) => ({text: item.trim()}))
-      .filter((item) => item.text !== "");
-    store.updateAccount(account.id, {name: newArrayAcc});
-  }
-}
-
 // Валидация полей
 const validateAccField = (account, field: 'login' | 'password') => {
   // результат валидации
@@ -66,6 +52,35 @@ const validateAccField = (account, field: 'login' | 'password') => {
     [field]: account[field],
   });
 }
+
+// отображение массива меток через разделитель ;
+const objAccName = ref<Record<number, string>>({});
+
+const formatName = (labels: { text: string }[] | string): string => {
+  return Array.isArray(labels) ? labels.map(item => item.text).join(';') : labels;
+};
+
+const parseName = (nameString: string): { text: string }[] => {
+  return nameString.split(';').map(item => ({ text: item.trim() }));
+};
+
+const updateName = (account: Account, nameString: string) => {
+  if (nameString) {
+    const newArrayAcc = parseName(nameString);
+    store.updateAccount(account.id, { name: newArrayAcc });
+  }
+};
+
+watch(() => data.accounts, (accounts) => {
+    accounts.forEach((account) => {
+      objAccName.value[account.id] = formatName(account.name);
+    });
+  },
+  {
+    deep: true,
+		  immediate: true
+  }
+);
 
 
 </script>
@@ -99,13 +114,13 @@ const validateAccField = (account, field: 'login' | 'password') => {
 										<v-col cols="2">
 												<v-text-field
 																:id="`username-${account.id}`"
-																v-model="account.nameAcc"
+																v-model="objAccName[account.id]"
 																label="Метки"
 																variant="outlined"
 																:aria-describedby="`username-messages-${account.id}`"
 																autocomplete="username"
 																hide-details
-																@blur="updateName(account, account.nameAcc)"
+																@blur="updateName(account, objAccName[account.id])"
 																@input="limitText(account, 'name', 50)"
 												/>
 										</v-col>

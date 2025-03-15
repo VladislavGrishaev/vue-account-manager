@@ -28,6 +28,8 @@ export const useAccountsStore = defineStore("accounts", {
     };
   },
 
+  persist: true, // Сохранение состояния в LocalStorage
+
   actions: {
     /** Получаем последний id из LocalStorage **/
     getLastId(): number {
