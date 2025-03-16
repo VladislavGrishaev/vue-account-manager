@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 interface Account {
   id: number;
   name: { text: string }[];
-  type: "LDAP" | "Локальная";
+  type: string;
   login: string;
   password: string | null;
 }
